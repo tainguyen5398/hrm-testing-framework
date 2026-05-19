@@ -8,7 +8,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 import java.lang.reflect.Method;
@@ -19,6 +21,7 @@ import java.util.Map;
 public class BaseUI {
 
     private static boolean initialized = false;
+    private static boolean isCI = System.getenv("CI") != null;
 
     public BaseUI() {
         if (!initialized) {
@@ -69,6 +72,13 @@ public class BaseUI {
         options.addArguments("--remote-allow-origins=*");
         options.setAcceptInsecureCerts(true);
 
+        // Enable headless mode in CI environment
+        if (isCI) {
+            options.addArguments("--headless=new");
+            options.addArguments("--disable-gpu");
+            System.out.println("Running in CI - Headless mode enabled");
+        }
+
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("profile.default_content_setting_values.notifications", 2);
         prefs.put("profile.password_manager_leak_detection", false);
@@ -79,12 +89,15 @@ public class BaseUI {
 
         ChromeDriver chrome = new ChromeDriver(options);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("width", 1920);
-        params.put("height", 1080);
-        params.put("deviceScaleFactor", 1);
-        params.put("mobile", false);
-        chrome.executeCdpCommand("Emulation.setDeviceMetricsOverride", params);
+        // Only set device metrics if not in headless mode
+        if (!isCI) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("width", 1920);
+            params.put("height", 1080);
+            params.put("deviceScaleFactor", 1);
+            params.put("mobile", false);
+            chrome.executeCdpCommand("Emulation.setDeviceMetricsOverride", params);
+        }
 
         WebDriver driver = chrome;
         driver.manage().window().maximize();
@@ -94,7 +107,12 @@ public class BaseUI {
 
     private WebDriver initEdgeDriver() {
         System.out.println("Launching Edge browser...");
-        WebDriver driver = new EdgeDriver();
+        EdgeOptions options = new EdgeOptions();
+        if (isCI) {
+            options.addArguments("--headless");
+            System.out.println("Running in CI - Headless mode enabled");
+        }
+        WebDriver driver = new EdgeDriver(options);
         driver.manage().window().maximize();
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(20));
         return driver;
@@ -102,7 +120,12 @@ public class BaseUI {
 
     private WebDriver initFirefoxDriver() {
         System.out.println("Launching Firefox browser...");
-        WebDriver driver = new FirefoxDriver();
+        FirefoxOptions options = new FirefoxOptions();
+        if (isCI) {
+            options.addArguments("-headless");
+            System.out.println("Running in CI - Headless mode enabled");
+        }
+        WebDriver driver = new FirefoxDriver(options);
         driver.manage().window().maximize();
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(20));
         return driver;

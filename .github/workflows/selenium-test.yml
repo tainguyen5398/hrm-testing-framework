@@ -40,9 +40,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Run Login Test with Xvfb
+      - name: Run Login Test
         working-directory: selenium_hrm
-        run: xvfb-run mvn test -Dtest=LoginTest -Dsurefire.useFile=false
+        run: mvn test -Dtest=LoginTest -Dsurefire.useFile=false
 
       - name: Upload Test Results
         if: failure()
