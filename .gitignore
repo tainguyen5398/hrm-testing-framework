@@ -1,0 +1,25 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Build
+target/
+build/
+
+# Logs
+logs/
+*.log
+
+# Reports
+extentReports/
+allure-results/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
