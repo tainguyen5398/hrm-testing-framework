@@ -31,8 +31,6 @@ jobs:
 
       - name: Set up Chrome and ChromeDriver
         uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: stable
 
       - name: Cache Maven packages
         uses: actions/cache@v5
