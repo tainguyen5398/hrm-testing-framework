@@ -72,21 +72,54 @@ A robust, scalable, and maintainable Selenium automation framework designed for 
 selenium_hrm/
 ├── src/
 │   ├── main/java/com/selenium_hrm/
-│   │   ├── config/                  # Configuration management
-│   │   ├── factory/                 # ThreadLocal WebDriver factory
-│   │   ├── listeners/              # TestNG event listeners
-│   │   └── utils/                   # Helper utilities
+│   │   ├── config/
+│   │   │   ├── ConfigHelper.java          # Environment configuration loader
+│   │   │   └── testdata/
+│   │   │       ├── PropertiesHelper.java   # Properties file handler
+│   │   │       ├── JsonHelper.java        # JSON data reader
+│   │   │       └── ExcelHelper.java       # Excel data reader
+│   │   │
+│   │   ├── factory/
+│   │   │   └── DriverManager.java         # ThreadLocal WebDriver factory
+│   │   │
+│   │   ├── listeners/
+│   │   │   └── TestListener.java          # TestNG event listeners
+│   │   │
+│   │   └── utils/
+│   │       ├── ActionHelper.java         # User action utilities
+│   │       ├── ElementHelper.java         # Element interaction helpers
+│   │       ├── WaitHelper.java            # Explicit wait utilities
+│   │       ├── VerificationHelper.java    # Assertion utilities
+│   │       └── CaptureHelper.java         # Screenshot utilities
 │   │
 │   └── test/
 │       ├── java/com/selenium_hrm/ui/
-│       │   ├── base/                # BaseUI, BasePage
-│       │   ├── pages/              # Page Objects
-│       │   └── tests/              # Test classes
-│       └── resources/              # Config & test data
+│       │   ├── base/
+│       │   │   ├── BaseUI.java            # Test base class
+│       │   │   └── BasePage.java          # Page object base class
+│       │   │
+│       │   ├── pages/
+│       │   │   ├── login/
+│       │   │   │   ├── LoginPage.java     # Login page elements
+│       │   │   │   └── LoginAction.java   # Login business flows
+│       │   │   └── ...
+│       │   │
+│       │   └── tests/
+│       │       ├── login/
+│       │       │   ├── LoginTest.java     # Login test cases
+│       │       │   └── LoginTestData.java  # Login test data
+│       │       └── ...
+│       │
+│       └── resources/
+│           ├── config/
+│           │   ├── config.properties       # Environment config
+│           │   ├── qa.properties
+│           │   └── staging.properties
+│           └── testdata/                  # Test data files
 │
-├── pom.xml                          # Maven configuration
-├── extentReports/                   # HTML reports output
-└── logs/                           # Log files
+├── pom.xml                                 # Maven configuration
+├── extentReports/                          # HTML report output
+└── logs/                                   # Log file output
 ```
 
 ### Design Patterns
@@ -114,7 +147,7 @@ selenium_hrm/
                       ▼
 ┌─────────────────────────────────────────────────────────┐
 │                   Base Layer                            │
-│  BasePage.java - Common helpers                         │
+│  BasePage.java - Common helpers (wait, click, sendKeys)  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -154,6 +187,8 @@ mvn clean install
 
 ### Running Tests
 
+#### Basic Commands
+
 ```bash
 # Run all tests (default: local, chrome)
 mvn test
@@ -173,18 +208,33 @@ mvn test -Dbrowser=edge
 mvn test -Denv=qa -Dtest=LoginTest -Dbrowser=chrome
 ```
 
+#### Headless Mode
+
+```bash
+# Enable headless for local testing
+mvn test -Dheadless=true
+```
+
 ### Viewing Reports
 
 #### Extent Reports
+
 ```bash
 # Report location after test run
 open extentReports/ExtentReport.html
 ```
 
 #### Allure Reports
+
 ```bash
 # Generate and serve Allure report
 mvn allure:serve
+
+# Generate report without serving
+mvn allure:generate
+
+# Open existing report
+mvn allure:open -Dallure.report.directory=target/allure-results
 ```
 
 ---
@@ -193,15 +243,17 @@ mvn allure:serve
 
 ### GitHub Actions
 
-Automated CI/CD pipeline at `.github/workflows/selenium-test.yml`.
+The framework includes automated CI/CD pipeline at `.github/workflows/selenium-test.yml`.
 
-**Features:**
+#### Workflow Features
+
 - Automatic test execution on push/PR
 - Headless Chrome execution in CI environment
 - Artifact upload for test results
 - Parallel execution support
 
-**Accessing CI Reports:**
+#### Accessing CI Reports
+
 1. Navigate to [Actions](https://github.com/tainguyen5398/hrm-testing-framework/actions)
 2. Select the workflow run
 3. Download artifacts from the job summary
@@ -209,6 +261,8 @@ Automated CI/CD pipeline at `.github/workflows/selenium-test.yml`.
 ---
 
 ## Configuration
+
+### Environment Configuration
 
 Edit `src/test/resources/config/config.properties`:
 
@@ -237,6 +291,37 @@ EXTENT_REPORT_PATH=target/extent-reports
 ALLURE_RESULTS_PATH=target/allure-results
 ```
 
+### Test Data
+
+Test data can be provided via:
+
+- **JSON**: Define in test data classes or JSON files
+- **Excel**: Place `.xlsx` files in `src/test/resources/testdata/`
+- **Properties**: Use `.properties` files for key-value data
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| `NoSuchElementException` | Increase explicit wait time or check locator |
+| `SessionNotCreatedException` | Update ChromeDriver version |
+| `Connection refused` | Check base URL in config.properties |
+| `NullPointerException` | Ensure driver is initialized in BaseUI |
+
+### Debug Mode
+
+```bash
+# Enable verbose logging
+mvn test -DlogLevel=DEBUG
+
+# Take screenshot on each step
+mvn test -DTAKE_SCREENSHOT_ON_FAILURE=true
+```
+
 ---
 
 ## Contributing
@@ -256,6 +341,6 @@ This project is for educational and testing purposes.
 
 ## Support
 
-- **Documentation**: [selenium_hrm/OverviewSource.md](selenium_hrm/OverviewSource.md)
+- **Documentation**: This file
 - **Issues**: [GitHub Issues](https://github.com/tainguyen5398/hrm-testing-framework/issues)
 - **CI/CD**: [GitHub Actions](https://github.com/tainguyen5398/hrm-testing-framework/actions)
