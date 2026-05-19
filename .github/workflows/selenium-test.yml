@@ -35,7 +35,7 @@ jobs:
           chrome-version: stable
 
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -55,22 +55,9 @@ jobs:
           retention-days: 7
 
       - name: Upload Allure Results
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allure-results-${{ github.run_number }}
           path: selenium_hrm/target/allure-results/
-          retention-days: 7
-
-      - name: Generate Allure Report
-        if: always()
-        working-directory: selenium_hrm
-        run: mvn allure:report || echo "Allure report generation skipped"
-
-      - name: Upload Allure Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report-${{ github.run_number }}
-          path: selenium_hrm/target/site/allure-maven-plugin/
           retention-days: 7
